@@ -14,4 +14,12 @@ def rating_keyboard():
             )
         ])
 
+    keyboard.append([
+        InlineKeyboardButton(text="⬅ Назад", callback_data="back_lesson")
+    ])
+
+    keyboard.append([
+        InlineKeyboardButton(text="🏠 В меню", callback_data="menu")
+    ])
+
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
