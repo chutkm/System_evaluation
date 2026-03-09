@@ -1,16 +1,16 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-def rating_keyboard():
+def days_keyboard(days):
 
     keyboard = []
 
-    for i in range(1, 6):
+    for day in days:
 
         keyboard.append([
             InlineKeyboardButton(
-                text="⭐" * i,
-                callback_data=f"rate_{i}"
+                text=day,
+                callback_data=f"day_{day}"
             )
         ])
 
