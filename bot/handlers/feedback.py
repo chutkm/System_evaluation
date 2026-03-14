@@ -62,6 +62,12 @@ async def check_group_exists(group_name: str) -> bool:
         )
         return bool(result.fetchone())
 
+def extract_fio(teacher_str):
+    if not teacher_str:
+        return ""
+    parts = teacher_str.split()
+    return " ".join(parts[-2:])
+
 
 async def get_week_schedule(group_name: str) -> dict:
     """Возвращает пары группы за последние 3 дня + сегодня"""
@@ -103,7 +109,7 @@ async def get_week_schedule(group_name: str) -> dict:
             "begin": lesson_data.get("beginLesson"),
             "end": lesson_data.get("endLesson"),
             "auditorium": lesson_data.get("auditorium"),
-            "lecturer": lesson_data.get("lecturer"),
+            "lecturer":extract_fio(lesson_data.get("lecturer")),
             "date": row.date
         })
 
@@ -199,9 +205,10 @@ async def choose_lesson(callback: CallbackQuery, state: FSMContext):
         return
 
     await state.update_data(
-        lesson_number=lesson_number,
-        lesson_date=selected_lesson["date"]
-    )
+    lesson_number=lesson_number,
+    lesson_date=selected_lesson["date"],
+    teacher=selected_lesson["lecturer"],
+    discipline=selected_lesson["discipline"])
 
     await state.set_state(FeedbackState.rating)
 
@@ -237,12 +244,14 @@ async def save_feedback(message: Message, state: FSMContext):
     data = await state.get_data()
 
     feedback_data = {
-        "group_name": data.get("group_name"),
-        "lesson_number": data.get("lesson_number"),
-        "lesson_date": data.get("lesson_date"),
-        "rating": data.get("rating"),
-        "text": message.text
-    }
+    "group_name": data.get("group_name"),
+    "lesson_number": data.get("lesson_number"),
+    "lesson_date": data.get("lesson_date"),
+    "rating": data.get("rating"),
+    "text": message.text,
+    "teacher": data.get("teacher"),
+    "discipline": data.get("discipline")
+}
 
     feedback = await create_feedback(feedback_data)
 

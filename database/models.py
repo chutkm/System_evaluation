@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Column, Integer, String, Date, Text
+from sqlalchemy import Column, Integer, String, Date, Text,JSON
 
 
 class Base(DeclarativeBase):
@@ -15,3 +15,8 @@ class Feedback(Base):
     rating = Column(Integer, nullable=False)
     text = Column(Text, nullable=False)
     lesson_date = Column(Date, nullable=False)  # эта колонка нужна в БД!
+    sentiment = Column(String)
+    topics = Column(JSON)
+
+    teacher = Column(String)
+    discipline = Column(String)

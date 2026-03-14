@@ -111,6 +111,8 @@
 #         await session.commit()
 
 
+import json
+
 from sqlalchemy import select, update
 
 from database.session import AsyncSessionLocal
@@ -152,8 +154,29 @@ async def update_feedback_analysis(feedback_id, sentiment, topics):
             .where(Feedback.id == feedback_id)
             .values(
                 sentiment=sentiment,
-                topics=",".join(topics)
+                topics=json.dumps(topics, ensure_ascii=False)
             )
         )
 
         await session.commit()
+
+
+async def get_unprocessed_feedback():
+    """
+    Получает отзывы, которые еще не анализировались
+    """
+    async with AsyncSessionLocal() as session:
+
+        result = await session.execute(
+            select(Feedback).where(Feedback.sentiment == None)
+        )
+
+        feedbacks = result.scalars().all()
+
+        return [
+            {
+                "id": f.id,
+                "text": f.text
+            }
+            for f in feedbacks
+        ]
