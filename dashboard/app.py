@@ -692,15 +692,59 @@ fig_sentiment = px.pie(
 st.plotly_chart(fig_sentiment, use_container_width=True)
 
 # ----------------- Проблемные темы -----------------
-st.subheader("⚠️ Проблемные темы")
+# st.subheader("⚠️ Проблемные темы")
+# negative_topics = df[df['sentiment'] == 'negative']
+# negative_counts = negative_topics["topics"].dropna().explode().value_counts().head(10)
+# st.bar_chart(negative_counts)
+
+# st.subheader("✅ Позитивные стороны")
+# positive_topics = df[df['sentiment'] == 'positive']
+# positive_counts = positive_topics["topics"].dropna().explode().value_counts().head(10)
+# st.bar_chart(positive_counts)
+st.subheader("⚠️ Проблемные темы : ")
+
 negative_topics = df[df['sentiment'] == 'negative']
-negative_counts = negative_topics["topics"].dropna().explode().value_counts().head(10)
-st.bar_chart(negative_counts)
+negative_counts = (
+    negative_topics["topics"]
+    .dropna()
+    .explode()
+    .value_counts()
+    .head(10)
+)
+
+fig_neg = px.bar(
+    negative_counts.sort_values(),  # сортируем для “ступеньки”
+    x=negative_counts.sort_values().values,
+    y=negative_counts.sort_values().index,
+    orientation='h',  # горизонтально
+    text=negative_counts.sort_values().values,
+    title="Топ проблемные темы"
+)
+fig_neg.update_layout(yaxis=dict(title="Темы"), xaxis=dict(title="Количество отзывов"))
+st.plotly_chart(fig_neg, use_container_width=True)
 
 st.subheader("✅ Позитивные стороны")
+
 positive_topics = df[df['sentiment'] == 'positive']
-positive_counts = positive_topics["topics"].dropna().explode().value_counts().head(10)
-st.bar_chart(positive_counts)
+positive_counts = (
+    positive_topics["topics"]
+    .dropna()
+    .explode()
+    .value_counts()
+    .head(10)
+)
+
+fig_pos = px.bar(
+    positive_counts.sort_values(),
+    x=positive_counts.sort_values().values,
+    y=positive_counts.sort_values().index,
+    orientation='h',
+    text=positive_counts.sort_values().values,
+    title="Топ позитивные темы"
+)
+fig_pos.update_layout(yaxis=dict(title="Темы"), xaxis=dict(title="Количество отзывов"))
+st.plotly_chart(fig_pos, use_container_width=True)
+
 
 # ----------------- Топ проблемных преподавателей -----------------
 st.subheader("👩‍🏫 Рекомендации преподавателям")
@@ -722,8 +766,24 @@ negative_teachers = teacher_sentiments.sort_values(
     ascending=False
 ).head(5)
 
-for (teacher_id, teacher_name), row in negative_teachers.iterrows():
+# for (teacher_id, teacher_name), row in negative_teachers.iterrows():
 
+#     st.markdown(f"### {teacher_name}")
+#     col1, col2 = st.columns(2)
+
+#     teacher_ratings = df[df.teacher_id == teacher_id]["rating"]
+#     avg_rating_teacher = round(teacher_ratings.mean(), 2) if len(teacher_ratings) else 0
+
+#     col1.metric("Средняя оценка", avg_rating_teacher)
+#     col2.metric("Доля негатива", f"{row['negative']*100:.1f}%")
+
+#     # Получаем рекомендации через LLM или из БД
+#     recommendation = get_teacher_recommendation(int(teacher_id))
+#     st.info(recommendation)
+
+# st.subheader("👩‍🏫 Персональная статистика преподавателя")
+
+for (teacher_id, teacher_name), row in negative_teachers.iterrows():
     st.markdown(f"### {teacher_name}")
     col1, col2 = st.columns(2)
 
@@ -733,7 +793,7 @@ for (teacher_id, teacher_name), row in negative_teachers.iterrows():
     col1.metric("Средняя оценка", avg_rating_teacher)
     col2.metric("Доля негатива", f"{row['negative']*100:.1f}%")
 
-    # Получаем рекомендации через LLM или из БД
-    recommendation = get_teacher_recommendation(int(teacher_id))
-    st.info(recommendation)
-
+    # Кнопка для показа рекомендации
+    if st.button(f"Запустить агента рекомендаций для {teacher_name}", key=teacher_id):
+        recommendation = get_teacher_recommendation(int(teacher_id))
+        st.info(recommendation)
