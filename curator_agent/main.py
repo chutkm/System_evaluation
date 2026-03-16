@@ -18,14 +18,14 @@ async def _async_main() -> None:
     configure_logging()
     config = load_config()
     agent = CuratorAgent(poll_interval_seconds=config.poll_interval_seconds)
-    await agent.start()
+    try:
+        await agent.start()
+    finally:
+        await agent.stop()
 
 
 def main() -> None:
-    try:
-        asyncio.run(_async_main())
-    except KeyboardInterrupt:
-        logging.info("Shutdown requested via Ctrl+C")
+    asyncio.run(_async_main())
 
 
 if __name__ == "__main__":

@@ -15,3 +15,12 @@ class DatabaseMonitor:
         """Return a list of unprocessed feedback rows."""
         return await get_unprocessed_feedback()
 
+    async def close(self) -> None:
+        """Placeholder for graceful DB shutdown.
+
+        Current repository helpers open/close sessions per call, so there is
+        nothing persistent to tear down here. This hook exists to keep the
+        curator's shutdown path explicit and future-proof.
+        """
+        return None
+
