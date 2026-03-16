@@ -701,7 +701,11 @@ st.plotly_chart(fig_sentiment, use_container_width=True)
 # positive_topics = df[df['sentiment'] == 'positive']
 # positive_counts = positive_topics["topics"].dropna().explode().value_counts().head(10)
 # st.bar_chart(positive_counts)
-st.subheader("⚠️ Проблемные темы : ")
+import pandas as pd
+import plotly.express as px
+
+# ----------------- Проблемные темы -----------------
+st.subheader("⚠️ Проблемные темы")
 
 negative_topics = df[df['sentiment'] == 'negative']
 negative_counts = (
@@ -712,17 +716,30 @@ negative_counts = (
     .head(10)
 )
 
-fig_neg = px.bar(
-    negative_counts.sort_values(),  # сортируем для “ступеньки”
-    x=negative_counts.sort_values().values,
-    y=negative_counts.sort_values().index,
-    orientation='h',  # горизонтально
-    text=negative_counts.sort_values().values,
-    title="Топ проблемные темы"
-)
-fig_neg.update_layout(yaxis=dict(title="Темы"), xaxis=dict(title="Количество отзывов"))
+if not negative_counts.empty:
+    fig_neg = px.bar(
+        x=negative_counts.values[::-1],  # горизонтальная "ступенька"
+        y=negative_counts.index[::-1],
+        orientation='h',
+        text=negative_counts.values[::-1],
+        title="Топ проблемные темы"
+    )
+    fig_neg.update_layout(yaxis=dict(title="Темы"), xaxis=dict(title="Количество отзывов"))
+else:
+    # создаем пустой датафрейм с колонками x и y
+    empty_df = pd.DataFrame({"Темы": [], "Количество": []})
+    fig_neg = px.bar(
+        empty_df,
+        x="Количество",
+        y="Темы",
+        orientation="h",
+        title="Нет данных для проблемных тем"
+    )
+
 st.plotly_chart(fig_neg, use_container_width=True)
 
+
+# ----------------- Позитивные темы -----------------
 st.subheader("✅ Позитивные стороны")
 
 positive_topics = df[df['sentiment'] == 'positive']
@@ -734,18 +751,26 @@ positive_counts = (
     .head(10)
 )
 
-fig_pos = px.bar(
-    positive_counts.sort_values(),
-    x=positive_counts.sort_values().values,
-    y=positive_counts.sort_values().index,
-    orientation='h',
-    text=positive_counts.sort_values().values,
-    title="Топ позитивные темы"
-)
-fig_pos.update_layout(yaxis=dict(title="Темы"), xaxis=dict(title="Количество отзывов"))
+if not positive_counts.empty:
+    fig_pos = px.bar(
+        x=positive_counts.values[::-1],
+        y=positive_counts.index[::-1],
+        orientation='h',
+        text=positive_counts.values[::-1],
+        title="Топ позитивные темы"
+    )
+    fig_pos.update_layout(yaxis=dict(title="Темы"), xaxis=dict(title="Количество отзывов"))
+else:
+    empty_df = pd.DataFrame({"Темы": [], "Количество": []})
+    fig_pos = px.bar(
+        empty_df,
+        x="Количество",
+        y="Темы",
+        orientation="h",
+        title="Нет данных для позитивных тем"
+    )
+
 st.plotly_chart(fig_pos, use_container_width=True)
-
-
 # ----------------- Топ проблемных преподавателей -----------------
 st.subheader("👩‍🏫 Рекомендации преподавателям")
 
